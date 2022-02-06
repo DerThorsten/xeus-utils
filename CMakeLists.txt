@@ -312,8 +312,16 @@ if (XEUS_UTILS_BUILD_EXECUTABLE)
 endif()
 
 if(XEUS_UTILS_EMSCRIPTEN_WASM_BUILD)
+    set(XEUS_WASM_INSTALL_DIR "/home/" CACHE STRING "install path for wasm files")
     add_executable(xeus_kernel src/main_emscripten_kernel.cpp )
     target_link_libraries(xeus_kernel  xeus-utils-static)
+
+    install(FILES
+        "$<TARGET_FILE_DIR:xeus_kernel>/xeus_kernel.js"
+        "$<TARGET_FILE_DIR:xeus_kernel>/xeus_kernel.wasm"
+        DESTINATION ${XEUS_WASM_INSTALL_DIR})
+
+
 endif()
 
 
@@ -322,6 +330,8 @@ endif()
 include(CMakePackageConfigHelpers)
 
 set(XEUS_UTILS_CMAKECONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}" CACHE STRING "install path for xeus-utilsConfig.cmake")
+
+
 
 # Install xeus-utils and xeus-utils-static
 if (XEUS_UTILS_BUILD_SHARED)
@@ -377,6 +387,7 @@ configure_package_config_file(${PROJECT_NAME}Config.cmake.in
 write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
                                  VERSION ${${PROJECT_NAME}_VERSION}
                                  COMPATIBILITY AnyNewerVersion)
+
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${PROJECT_NAME}Config.cmake
               ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
               DESTINATION ${XEUS_UTILS_CMAKECONFIG_INSTALL_DIR})
