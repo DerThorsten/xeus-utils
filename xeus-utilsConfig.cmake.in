@@ -1,0 +1,45 @@
+############################################################################
+# Copyright (c) 2022, Thorsten Beier          
+#                                                     
+#                                                                          
+# Distributed under the terms of the BSD 3-Clause License.               
+#                                                                          
+# The full license is in the file LICENSE, distributed with this software. 
+############################################################################
+
+# xeus-utils cmake module
+# This module sets the following variables in your project::
+#
+#   xeus-utils_FOUND - true if xeus-utils was found on the system
+#   xeus-utils_INCLUDE_DIRS - the directory containing xeus-utils headers
+#   xeus-utils_LIBRARY - the library for dynamic linking
+#   xeus-utils_STATIC_LIBRARY - the library for static linking
+
+@PACKAGE_INIT@
+
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR};${CMAKE_MODULE_PATH}")
+
+@XEUS_CONFIG_CODE@
+
+include(CMakeFindDependencyMacro)
+find_dependency(xtl @xtl_REQUIRED_VERSION@)
+find_dependency(xeus @xeus_REQUIRED_VERSION@)
+find_dependency(cppzmq @cppzmq_REQUIRED_VERSION@)
+
+
+if (NOT TARGET xeus-utils AND NOT TARGET xeus-utils-static)
+    include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
+
+    if (TARGET xeus-utils AND TARGET xeus-utils-static)
+        get_target_property(@PROJECT_NAME@_INCLUDE_DIR xeus-utils INTERFACE_INCLUDE_DIRECTORIES)
+        get_target_property(@PROJECT_NAME@_LIBRARY xeus-utils LOCATION)
+        get_target_property(@PROJECT_NAME@_STATIC_LIBRARY xeus-utils-static LOCATION)
+    elseif (TARGET xeus-utils)
+        get_target_property(@PROJECT_NAME@_INCLUDE_DIR xeus-utils INTERFACE_INCLUDE_DIRECTORIES)
+        get_target_property(@PROJECT_NAME@_LIBRARY xeus-utils LOCATION)
+    elseif (TARGET xeus-utils-static)
+        get_target_property(@PROJECT_NAME@_INCLUDE_DIR xeus-utils-static INTERFACE_INCLUDE_DIRECTORIES)
+        get_target_property(@PROJECT_NAME@_STATIC_LIBRARY xeus-utils-static LOCATION)
+        set(@PROJECT_NAME@_LIBRARY ${@PROJECT_NAME@_STATIC_LIBRARY})
+    endif ()
+endif ()

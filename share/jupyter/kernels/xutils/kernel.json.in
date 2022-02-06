@@ -1,0 +1,11 @@
+{
+  "display_name": "utils 1.0.0 (xutils)",
+  "argv": [
+      "@XEUS_UTILS_KERNELSPEC_PATH@xutils",
+      "-f",
+      "{connection_file}"
+  ],
+  "language": "utils",
+  "metadata": {"debugger": false
+  }
+}
