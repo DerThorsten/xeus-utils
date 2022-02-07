@@ -39,7 +39,7 @@ namespace xeus_utils
 
         if (code.compare("hello, world") == 0)
         {
-            publish_stream("stdout", code);
+            publish_stream("stdout", code+ std::string("bazinga!!"));
         }
 
         if (code.compare("error") == 0)

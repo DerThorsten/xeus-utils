@@ -177,6 +177,7 @@ jobs:
           emcmake cmake .. \
            -DXEUS_UTILS_EMSCRIPTEN_WASM_BUILD=ON \
            -Dxtl_DIR=/custom_sysroot/share/cmake/xtl \
+           -DXEUS_WASM_INSTALL_DIR=/custom_sysroot \
            -Dnlohmann_json_DIR=/custom_sysroot/lib/cmake/nlohmann_json \
            -Dxeus_DIR=/custom_sysroot/lib/cmake/xeus \
            -DCMAKE_INSTALL_PREFIX=/custom_sysroot
@@ -290,6 +291,7 @@ jobs:
           emcmake cmake .. \
            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/custom_sysroot \
            -DXEUS_UTILS_EMSCRIPTEN_WASM_BUILD=ON \
+           -DXEUS_WASM_INSTALL_DIR=/custom_sysroot \
            -Dxtl_DIR=$GITHUB_WORKSPACE/custom_sysroot/share/cmake/xtl \
            -Dnlohmann_json_DIR=$GITHUB_WORKSPACE/custom_sysroot/lib/cmake/nlohmann_json \
            -Dxeus_DIR=$GITHUB_WORKSPACE/custom_sysroot/lib/cmake/xeus 
