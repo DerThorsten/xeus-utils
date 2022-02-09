@@ -76,6 +76,16 @@ endif()
 set(xtl_REQUIRED_VERSION 0.6.23)
 set(xeus_REQUIRED_VERSION 2.0.0)
 
+# for the emscripten build boost
+# is included via some magic linker flag
+if(NOT XEUS_UTILS_EMSCRIPTEN_WASM_BUILD)
+    find_package(Boost REQUIRED)
+else()
+    set(XEUS_EMSCRIPTEN_WASM_FLAGS "${XEUS_EMSCRIPTEN_WASM_FLAGS} -s USE_BOOST_HEADERS=1")
+endif()
+
+find_package(CLI11 REQUIRED)
+
 if (NOT TARGET xtl)
     find_package(xtl ${xtl_REQUIRED_VERSION} REQUIRED)
 endif ()
@@ -122,6 +132,11 @@ endif ()
 if(XEUS_UTILS_EMSCRIPTEN_WASM_BUILD)
 
     include(XeusEmscriptenWasmFlags)
+
+
+    # fetch
+    set(XEUS_EMSCRIPTEN_WASM_FLAGS "${XEUS_EMSCRIPTEN_WASM_FLAGS} -s  FETCH=1  -s NO_EXIT_RUNTIME=1")
+
 
     # async
     set(XEUS_EMSCRIPTEN_WASM_FLAGS "${XEUS_EMSCRIPTEN_WASM_FLAGS} --bind")
@@ -315,7 +330,7 @@ if(XEUS_UTILS_EMSCRIPTEN_WASM_BUILD)
     set(XEUS_WASM_INSTALL_DIR "/home/" CACHE STRING "install path for wasm files")
     add_executable(xeus_kernel src/main_emscripten_kernel.cpp )
     target_link_libraries(xeus_kernel  xeus-utils-static)
-
+    target_compile_features(xeus_kernel PRIVATE cxx_std_17)
     install(FILES
         "$<TARGET_FILE_DIR:xeus_kernel>/xeus_kernel.js"
         "$<TARGET_FILE_DIR:xeus_kernel>/xeus_kernel.wasm"
