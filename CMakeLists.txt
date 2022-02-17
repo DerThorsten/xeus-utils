@@ -336,10 +336,10 @@ if(XEUS_UTILS_EMSCRIPTEN_WASM_BUILD)
     add_executable(xeus_kernel src/main_emscripten_kernel.cpp )
     target_link_libraries(xeus_kernel  xeus-utils-static)
     target_compile_features(xeus_kernel PRIVATE cxx_std_17)
-    install(FILES
-        "$<TARGET_FILE_DIR:xeus_kernel>/xeus_kernel.js"
-        "$<TARGET_FILE_DIR:xeus_kernel>/xeus_kernel.wasm"
-        DESTINATION ${XEUS_WASM_INSTALL_DIR})
+    # install(FILES
+    #     "$<TARGET_FILE_DIR:xeus_kernel>/xeus_kernel.js"
+    #     "$<TARGET_FILE_DIR:xeus_kernel>/xeus_kernel.wasm"
+    #     DESTINATION ${XEUS_WASM_INSTALL_DIR})
 
 
 endif()
@@ -389,6 +389,19 @@ if (XEUS_UTILS_BUILD_EXECUTABLE)
                 PATTERN "*.in" EXCLUDE)
     endif ()
 endif ()
+
+
+# install xeus wasm
+if(XEUS_UTILS_EMSCRIPTEN_WASM_BUILD)
+
+
+    install(TARGETS xeus_kernel
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+
+endif()
+
+
 
 # Configure 'xeus-utilsConfig.cmake' for a build tree
 set(XEUS_UTILS_CONFIG_CODE "####### Expanded from \@XEUS_UTILS_CONFIG_CODE\@ #######\n")
