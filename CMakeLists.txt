@@ -76,6 +76,16 @@ endif()
 set(xtl_REQUIRED_VERSION 0.6.23)
 set(xeus_REQUIRED_VERSION 2.0.0)
 
+# for the emscripten build boost
+# is included via some magic linker flag
+if(NOT XEUS_UTILS_EMSCRIPTEN_WASM_BUILD)
+    find_package(Boost REQUIRED)
+else()
+    set(XEUS_EMSCRIPTEN_WASM_FLAGS "${XEUS_EMSCRIPTEN_WASM_FLAGS} -s USE_BOOST_HEADERS=1")
+endif()
+
+find_package(CLI11 REQUIRED)
+
 if (NOT TARGET xtl)
     find_package(xtl ${xtl_REQUIRED_VERSION} REQUIRED)
 endif ()
@@ -122,6 +132,11 @@ endif ()
 if(XEUS_UTILS_EMSCRIPTEN_WASM_BUILD)
 
     include(XeusEmscriptenWasmFlags)
+
+
+    # fetch
+    set(XEUS_EMSCRIPTEN_WASM_FLAGS "${XEUS_EMSCRIPTEN_WASM_FLAGS} -s  FETCH=1  -s NO_EXIT_RUNTIME=1")
+    set(XEUS_EMSCRIPTEN_WASM_FLAGS "${XEUS_EMSCRIPTEN_WASM_FLAGS} -s USE_ZLIB=1")
 
     # async
     set(XEUS_EMSCRIPTEN_WASM_FLAGS "${XEUS_EMSCRIPTEN_WASM_FLAGS} --bind")
@@ -265,7 +280,12 @@ macro(xeus_utils_create_target target_name linkage output_name)
         set(XEUS_UTILS_XEUS_TARGET xeus-static)
     endif ()
 
-    target_link_libraries(${target_name} PUBLIC ${XEUS_UTILS_XEUS_TARGET} xtl )
+    if(XEUS_UTILS_EMSCRIPTEN_WASM_BUILD)
+        target_link_libraries(${target_name} PUBLIC ${XEUS_UTILS_XEUS_TARGET} xtl CLI11::CLI11)
+    else()
+        target_link_libraries(${target_name} PUBLIC ${XEUS_UTILS_XEUS_TARGET} xtl CLI11::CLI11 Boost::boost)
+    endif()
+
     if (WIN32 OR CYGWIN)
         # 
     elseif (APPLE)
@@ -315,11 +335,11 @@ if(XEUS_UTILS_EMSCRIPTEN_WASM_BUILD)
     set(XEUS_WASM_INSTALL_DIR "/home/" CACHE STRING "install path for wasm files")
     add_executable(xeus_kernel src/main_emscripten_kernel.cpp )
     target_link_libraries(xeus_kernel  xeus-utils-static)
-
-    install(FILES
-        "$<TARGET_FILE_DIR:xeus_kernel>/xeus_kernel.js"
-        "$<TARGET_FILE_DIR:xeus_kernel>/xeus_kernel.wasm"
-        DESTINATION ${XEUS_WASM_INSTALL_DIR})
+    target_compile_features(xeus_kernel PRIVATE cxx_std_17)
+    # install(FILES
+    #     "$<TARGET_FILE_DIR:xeus_kernel>/xeus_kernel.js"
+    #     "$<TARGET_FILE_DIR:xeus_kernel>/xeus_kernel.wasm"
+    #     DESTINATION ${XEUS_WASM_INSTALL_DIR})
 
 
 endif()
@@ -369,6 +389,19 @@ if (XEUS_UTILS_BUILD_EXECUTABLE)
                 PATTERN "*.in" EXCLUDE)
     endif ()
 endif ()
+
+
+# install xeus wasm
+if(XEUS_UTILS_EMSCRIPTEN_WASM_BUILD)
+
+
+    install(TARGETS xeus_kernel
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+
+endif()
+
+
 
 # Configure 'xeus-utilsConfig.cmake' for a build tree
 set(XEUS_UTILS_CONFIG_CODE "####### Expanded from \@XEUS_UTILS_CONFIG_CODE\@ #######\n")

@@ -22,7 +22,7 @@
 
 #include "xeus_utils_config.hpp"
 #include "xeus/xinterpreter.hpp"
-
+#include "xeus-utils/xmagic.hpp"
 
 namespace nl = nlohmann;
 
@@ -58,6 +58,7 @@ namespace xeus_utils
 
         void shutdown_request_impl() override;
 
+        MagicExecuter m_magic_executor;
     };
 }
 
