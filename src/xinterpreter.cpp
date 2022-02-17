@@ -18,9 +18,11 @@
 #include "xeus-utils/xinterpreter.hpp"
 #include "xeus-utils/xmagic.hpp"
 
-#ifdef XSQL_EMSCRIPTEN_WASM_BUILD
+#ifdef XEUS_UTILS_EMSCRIPTEN_WASM_BUILD
 #include "xeus-utils/xfetch.hpp"
+#include "xeus-utils/xzip.hpp"
 #endif
+#include "xeus-utils/xfilesystem.hpp"
 
 namespace nl = nlohmann;
 
@@ -31,21 +33,51 @@ namespace xeus_utils
     {
         using token_iterator = typename MagicExecuter::token_iterator;
         xeus::register_interpreter(this);
-        // m_magic_executor.add_callback("fetch",[&](token_iterator begin, token_iterator end){
+        static const xinterpreter_cout xcout;
 
-        //     for(;begin!=end;++begin)
-        //     {
-        //         std::cout << *begin << "\n";
-        //         this->publish_stream("stdout", *begin+std::string("\n"));
-        //     }
-        // });
+        m_magic_executor.add_callback("fubar",[&](auto & app){
 
-        #ifdef XSQL_EMSCRIPTEN_WASM_BUILD
-        m_magic_executor.add_typed_callback<std::string,std::string>("fetch",[&](
-            auto url, 
-            auto storage
-        ){
-            fetch(url, storage);
+            std::string url;
+            app().add_option("-u,--url",url, "an url")->required();
+
+            app.parse([&](){
+                xcout<<"parsed successful url:"<<url<<"\n";
+            });
+        });
+
+
+        m_magic_executor.add_callback("ls",[&](auto & app){
+            std::string dir;
+            app().add_option("-d,--dir",dir, "a directory")->required();
+            app.parse([&](){
+                ls(dir);
+            });
+        });
+
+        m_magic_executor.add_callback("mkdir",[&](auto & app){
+            std::string dir;
+            app().add_option("-d,--dir",dir, "a directory")->required();
+            app.parse([&](){
+                std::filesystem::create_directory(dir);
+            });
+        });
+
+        #ifdef XEUS_UTILS_EMSCRIPTEN_WASM_BUILD
+        m_magic_executor.add_callback("fetch",[&](auto & app){
+            std::string url, filename;
+            app().add_option("-u,--url",url, "an url")->required();
+            app().add_option("-f,--filename",filename, "an filename")->required();
+            app.parse([&](){
+                fetch(url, filename);
+            });
+        });
+        m_magic_executor.add_callback("untar",[&](auto & app){
+            std::string filename, dirname;
+            app().add_option("-f,--filename",filename, "an filename")->required();
+            app().add_option("-d,--dirname",dirname, "an dirname")->required();
+            app.parse([&](){
+                untar_file(filename, dirname);
+            });
         });
         #endif
     }
@@ -59,7 +91,7 @@ namespace xeus_utils
     {
         nl::json kernel_res;
         try{
-            m_magic_executor.dispatch(code);
+            auto magic_state = m_magic_executor.dispatch(code);
         }
         catch (const std::exception& e) { 
             publish_execution_error("error","Error", std::vector<std::string>(1, std::string(e.what())));

@@ -136,7 +136,7 @@ if(XEUS_UTILS_EMSCRIPTEN_WASM_BUILD)
 
     # fetch
     set(XEUS_EMSCRIPTEN_WASM_FLAGS "${XEUS_EMSCRIPTEN_WASM_FLAGS} -s  FETCH=1  -s NO_EXIT_RUNTIME=1")
-
+    set(XEUS_EMSCRIPTEN_WASM_FLAGS "${XEUS_EMSCRIPTEN_WASM_FLAGS} -s USE_ZLIB=1")
 
     # async
     set(XEUS_EMSCRIPTEN_WASM_FLAGS "${XEUS_EMSCRIPTEN_WASM_FLAGS} --bind")
@@ -280,7 +280,12 @@ macro(xeus_utils_create_target target_name linkage output_name)
         set(XEUS_UTILS_XEUS_TARGET xeus-static)
     endif ()
 
-    target_link_libraries(${target_name} PUBLIC ${XEUS_UTILS_XEUS_TARGET} xtl )
+    if(XEUS_UTILS_EMSCRIPTEN_WASM_BUILD)
+        target_link_libraries(${target_name} PUBLIC ${XEUS_UTILS_XEUS_TARGET} xtl CLI11::CLI11)
+    else()
+        target_link_libraries(${target_name} PUBLIC ${XEUS_UTILS_XEUS_TARGET} xtl CLI11::CLI11 Boost::boost)
+    endif()
+
     if (WIN32 OR CYGWIN)
         # 
     elseif (APPLE)
